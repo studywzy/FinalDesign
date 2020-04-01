@@ -47,6 +47,10 @@
         </activity>
 
         <activity
+                android:name=".InputTipsActivity"
+                android:screenOrientation="portrait"/>
+
+        <activity
                 android:name=".DriveRouteDetailActivity"
                 android:label="@string/route_demo"
                 android:screenOrientation="portrait" />

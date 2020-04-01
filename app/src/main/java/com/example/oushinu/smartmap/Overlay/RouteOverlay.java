@@ -1,4 +1,4 @@
-package com.example.oushinu.smartmap;
+package com.example.oushinu.smartmap.Overlay;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -14,6 +14,7 @@ import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.Polyline;
 import com.amap.api.maps.model.PolylineOptions;
+import com.example.oushinu.smartmap.R;
 
 import java.util.ArrayList;
 import java.util.List;

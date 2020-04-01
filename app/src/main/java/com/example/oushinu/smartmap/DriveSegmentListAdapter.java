@@ -16,8 +16,7 @@ import java.util.List;
 
 /**
  * 驾车路段adapter
- * 
- * @author ligen
+ *
  * 
  */
 public class DriveSegmentListAdapter extends BaseAdapter {

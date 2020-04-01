@@ -1,4 +1,4 @@
-package com.example.oushinu.smartmap;
+package com.example.oushinu.smartmap.Overlay;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -16,6 +16,7 @@ import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.route.DrivePath;
 import com.amap.api.services.route.DriveStep;
 import com.amap.api.services.route.TMC;
+import com.example.oushinu.smartmap.R;
 import com.example.oushinu.smartmap.util.AMapUtil;
 
 
@@ -26,7 +27,7 @@ import java.util.List;
 /**
  * 导航路线图层类。
  */
-public class DrivingRouteOverlay extends RouteOverlay{
+public class DrivingRouteOverlay extends RouteOverlay {
 
 	private DrivePath drivePath;
     private List<LatLonPoint> throughPointList;

@@ -16,6 +16,10 @@ import com.example.oushinu.smartmap.util.AMapUtil;
 
 import java.util.List;
 
+/**
+ * 驾车具体路径activity
+ */
+
 
 public class DriveRouteDetailActivity extends Activity {
 	private DrivePath mDrivePath;
@@ -27,7 +31,7 @@ public class DriveRouteDetailActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_route_detail);
+		setContentView(R.layout.activity_route_detail);//唤醒驾车具体路径布局文件
 
 		getIntentData();
 		init();

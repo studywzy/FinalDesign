@@ -8,25 +8,51 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.amap.api.maps.AMap;
+import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.model.*;
 import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.core.PoiItem;
+import com.amap.api.services.core.SuggestionCity;
+import com.amap.api.services.help.Tip;
+import com.amap.api.services.poisearch.PoiResult;
+import com.amap.api.services.poisearch.PoiSearch;
 import com.amap.api.services.route.BusRouteResult;
 import com.amap.api.services.route.DrivePath;
 import com.amap.api.services.route.DriveRouteResult;
 import com.amap.api.services.route.RideRouteResult;
 import com.amap.api.services.route.RouteSearch;
 import com.amap.api.services.route.WalkRouteResult;
+import com.example.oushinu.smartmap.Overlay.DrivingRouteOverlay;
+import com.example.oushinu.smartmap.Overlay.PoiOverlay;
 import com.example.oushinu.smartmap.util.AMapUtil;
+import com.example.oushinu.smartmap.util.Constants;
 import com.example.oushinu.smartmap.util.ToastUtil;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements AMap.OnMyLocationChangeListener,AMap.OnMapClickListener,
-        AMap.OnMarkerClickListener, RouteSearch.OnRouteSearchListener {
+        AMap.OnMarkerClickListener, RouteSearch.OnRouteSearchListener,AMap.InfoWindowAdapter,
+        PoiSearch.OnPoiSearchListener , View.OnClickListener {
 
     private AMap aMap;
+    private String mKeyWords = "";// 要输入的poi搜索关键字
+    private PoiResult poiResult; // poi返回的结果
+    private int currentPage = 1;
+    private PoiSearch.Query query;// Poi查询条件类
+    private PoiSearch poiSearch;// POI搜索
+    private TextView mKeywordsTextView;
+    private Marker mPoiMarker;
+    private ImageView mCleanKeyWords;
+
+    public static final int REQUEST_CODE = 100;
+    public static final int RESULT_CODE_INPUTTIPS = 101;
+    public static final int RESULT_CODE_KEYWORDS = 102;
+
     private MapView mapView;
     private MyLocationStyle myLocationStyle;
     private static final int STROKE_COLOR = Color.argb(180, 3, 145, 255);
@@ -47,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);// 不显示程序的标题栏
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);// 不显示程序的标题栏
 
         setContentView(R.layout.activity_main);
 
@@ -57,10 +83,16 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
 
         mapView.onCreate(savedInstanceState);// Activity被唤醒时调用地图唤醒
 
+        mCleanKeyWords = (ImageView)findViewById(R.id.clean_keywords);
+        mCleanKeyWords.setOnClickListener(this);
+
         init();//调用init()方法
+
+        mKeyWords = "";
 
         setfromandtoMarker();//调用setfromandtoMarker()方法
 
+        //借助地图SDK实现定位，两秒钟定位一次，定位蓝点不自动移动到视图中间，且定位图标可随手机朝向旋转
         myLocationStyle = new MyLocationStyle();
         myLocationStyle.strokeColor(STROKE_COLOR);// 设置圆形的边框颜色
         myLocationStyle.radiusFillColor(FILL_COLOR);// 设置圆形的填充颜色
@@ -69,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
         aMap.setMyLocationStyle(myLocationStyle);//设置定位蓝点的Style
         aMap.getUiSettings().setMyLocationButtonEnabled(true);//设置默认定位按钮是否显示，非必需设置。
         aMap.setMyLocationEnabled(true);// 设置为true表示启动显w示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false
+        aMap.getUiSettings().setZoomControlsEnabled(false);//隐藏缩放按钮
     }
 
     //设置起点终点位置和图标
@@ -88,7 +121,12 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
         if (aMap == null) {
             aMap = mapView.getMap();//获得地图控制器AMap对象
         }
+
         registerListener();//注册监听
+
+        mKeywordsTextView = (TextView) findViewById(R.id.main_keywords);
+        mKeywordsTextView.setOnClickListener(this);
+
         mRouteSearch = new RouteSearch(this);
         mRouteSearch.setRouteSearchListener(this);
 
@@ -107,9 +145,29 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
      * 注册监听
      */
     private void registerListener() {
-        aMap.setOnMapClickListener(this);
-        aMap.setOnMarkerClickListener(this);
+        aMap.setOnMapClickListener(this);//添加点击map监听事件
+        aMap.setOnMarkerClickListener(this);//添加点击marker监听事件
+        aMap.setInfoWindowAdapter(this);// 添加显示infowindow监听事件
+        aMap.getUiSettings().setRotateGesturesEnabled(false);
 
+    }
+
+    /**
+     * 开始进行poi搜索
+     */
+    protected void doSearchQuery(String keywords) {
+        showProgressDialog();// 显示进度框
+        currentPage = 1;
+        // 第一个参数表示搜索字符串，第二个参数表示poi搜索类型，第三个参数表示poi搜索区域（空字符串代表全国）
+        query = new PoiSearch.Query(keywords, "", Constants.DEFAULT_CITY);
+        // 设置每页最多返回多少条poiitem
+        query.setPageSize(10);
+        // 设置查第一页
+        query.setPageNum(currentPage);
+
+        poiSearch = new PoiSearch(this, query);
+        poiSearch.setOnPoiSearchListener(this);
+        poiSearch.searchPOIAsyn();
     }
 
     public void onDriveClick(View view) {
@@ -145,7 +203,84 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
 
     @Override
     public boolean onMarkerClick(Marker marker) {
+        marker.showInfoWindow();
         return false;
+    }
+
+    @Override
+    public View getInfoContents(Marker marker) {
+        return null;
+    }
+
+    @Override
+    public View getInfoWindow(final Marker marker) {
+        View view = getLayoutInflater().inflate(R.layout.poikeywordsearch_uri,
+                null);
+        TextView title = (TextView) view.findViewById(R.id.title);
+        title.setText(marker.getTitle());
+
+        TextView snippet = (TextView) view.findViewById(R.id.snippet);
+        snippet.setText(marker.getSnippet());
+        return view;
+    }
+
+    /**
+     * poi没有搜索到数据，返回一些推荐城市的信息
+     */
+    private void showSuggestCity(List<SuggestionCity> cities) {
+        String infomation = "推荐城市\n";
+        for (int i = 0; i < cities.size(); i++) {
+            infomation += "城市名称:" + cities.get(i).getCityName() + "城市区号:"
+                    + cities.get(i).getCityCode() + "城市编码:"
+                    + cities.get(i).getAdCode() + "\n";
+        }
+        ToastUtil.show(MainActivity.this, infomation);
+
+    }
+
+    /**
+     * POI信息查询回调方法
+     */
+    @Override
+    public void onPoiSearched(PoiResult result, int rCode) {
+        dissmissProgressDialog();// 隐藏对话框
+        if (rCode == 1000) {
+            if (result != null && result.getQuery() != null) {// 搜索poi的结果
+                if (result.getQuery().equals(query)) {// 是否是同一条
+                    poiResult = result;
+                    // 取得搜索到的poiitems有多少页
+                    List<PoiItem> poiItems = poiResult.getPois();// 取得第一页的poiitem数据，页数从数字0开始
+                    List<SuggestionCity> suggestionCities = poiResult
+                            .getSearchSuggestionCitys();// 当搜索不到poiitem数据时，会返回含有搜索关键字的城市信息
+
+                    if (poiItems != null && poiItems.size() > 0) {
+                        aMap.clear();// 清理之前的图标
+                        PoiOverlay poiOverlay = new PoiOverlay(aMap, poiItems);
+                        poiOverlay.removeFromMap();
+                        poiOverlay.addToMap();
+                        poiOverlay.zoomToSpan();
+                    } else if (suggestionCities != null
+                            && suggestionCities.size() > 0) {
+                        showSuggestCity(suggestionCities);
+                    } else {
+                        ToastUtil.show(MainActivity.this,
+                                R.string.no_result);
+                    }
+                }
+            } else {
+                ToastUtil.show(MainActivity.this,
+                        R.string.no_result);
+            }
+        } else {
+            ToastUtil.showerror(this, rCode);
+        }
+
+    }
+
+    @Override
+    public void onPoiItemSearched(PoiItem item, int rCode) {
+        // TODO Auto-generated method stub
+
     }
 
     @Override
@@ -202,6 +337,82 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
             ToastUtil.showerror(this.getApplicationContext(), errorCode);
         }
 
+    }
+
+    /**
+     * 输入提示activity选择结果后的处理逻辑
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_CODE_INPUTTIPS && data
+                != null) {
+            aMap.clear();
+            Tip tip = data.getParcelableExtra(Constants.EXTRA_TIP);
+            if (tip.getPoiID() == null || tip.getPoiID().equals("")) {
+                doSearchQuery(tip.getName());
+            } else {
+                addTipMarker(tip);
+            }
+            mKeywordsTextView.setText(tip.getName());
+            if(!tip.getName().equals("")){
+                mCleanKeyWords.setVisibility(View.VISIBLE);
+            }
+        } else if (resultCode == RESULT_CODE_KEYWORDS && data != null) {
+            aMap.clear();
+            String keywords = data.getStringExtra(Constants.KEY_WORDS_NAME);
+            if(keywords != null && !keywords.equals("")){
+                doSearchQuery(keywords);
+            }
+            mKeywordsTextView.setText(keywords);
+            if(!keywords.equals("")){
+                mCleanKeyWords.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    /**
+     * 用marker展示输入提示list选中数据
+     *
+     * @param tip
+     */
+    private void addTipMarker(Tip tip) {
+        if (tip == null) {
+            return;
+        }
+        mPoiMarker = aMap.addMarker(new MarkerOptions());
+        LatLonPoint point = tip.getPoint();
+        if (point != null) {
+            LatLng markerPosition = new LatLng(point.getLatitude(), point.getLongitude());
+            mPoiMarker.setPosition(markerPosition);
+            aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerPosition, 17));
+        }
+        mPoiMarker.setTitle(tip.getName());
+        mPoiMarker.setSnippet(tip.getAddress());
+    }
+
+    /**
+     * 点击事件回调方法
+     */
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.main_keywords:
+                Intent intent = new Intent(this, InputTipsActivity.class);
+                startActivityForResult(intent, REQUEST_CODE);
+                break;
+            case R.id.clean_keywords:
+                mKeywordsTextView.setText("");
+                aMap.clear();
+                mCleanKeyWords.setVisibility(View.GONE);
+            default:
+                break;
+        }
     }
 
     @Override

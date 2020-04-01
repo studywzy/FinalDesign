@@ -6,6 +6,15 @@
     android:layout_height="match_parent"
     tools:context="com.example.oushinu.smartmap.MainActivity">
 
+    <com.amap.api.maps.MapView
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true">
+    </com.amap.api.maps.MapView>
+
     <RelativeLayout
         android:id="@+id/bottom_layout"
         android:layout_width="match_parent"
@@ -16,33 +25,14 @@
         android:gravity="center_vertical"
         android:visibility="gone" >
 
-        <TextView
-            android:id="@+id/firstline"
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:layout_marginLeft="12dp"
-            android:singleLine="true"
-            android:textColor="#333333"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/secondline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/firstline"
-            android:layout_marginLeft="12dp"
-            android:gravity="right"
-            android:singleLine="true"
-            android:textColor="#999999"
-            android:textSize="13sp"
-            android:visibility="gone"/>
-
         <LinearLayout
             android:id="@+id/detail"
             android:layout_width="wrap_content"
             android:layout_height="35dp"
             android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
@@ -58,17 +48,82 @@
                 android:layout_width="7dp"
                 android:layout_height="13dp"
                 android:layout_marginLeft="4dp"
+                android:layout_marginStart="4dp"
                 android:background="@drawable/arrow_right_blue"
                 android:gravity="center_vertical" />
         </LinearLayout>
+
+        <TextView
+                android:id="@+id/firstline"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginLeft="12dp"
+                android:layout_marginStart="12dp"
+                android:singleLine="true"
+                android:textColor="#333333"
+                android:textSize="16sp" />
+
+        <TextView
+                android:id="@+id/secondline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/firstline"
+                android:layout_marginLeft="12dp"
+                android:layout_marginStart="12dp"
+                android:gravity="end"
+                android:singleLine="true"
+                android:textColor="#999999"
+                android:textSize="13sp"
+                android:visibility="gone"/>
     </RelativeLayout>
 
-    <com.amap.api.maps.MapView
-            android:id="@+id/map"
+    <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentStart="true" android:layout_alignParentTop="true" android:layout_alignParentLeft="true">
-    </com.amap.api.maps.MapView>
+            android:layout_height="48dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/white">
+
+        <ImageView
+                android:id="@+id/clean_keywords"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="10dp"
+                android:layout_marginEnd="10dp"
+                android:src="@mipmap/ic_close"
+                android:visibility="gone"
+        />
+
+        <EditText
+                android:id="@+id/main_keywords"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                android:clickable="true"
+                android:focusable="true"
+                android:completionThreshold="1"
+                android:drawableLeft="@mipmap/ic_search"
+                android:drawableStart="@mipmap/ic_search"
+                android:dropDownVerticalOffset="1.0dip"
+                android:gravity="center_vertical"
+                android:hint="关键字搜索"
+                android:imeOptions="actionDone"
+                android:inputType="text|textAutoComplete"
+                android:maxLength="20"
+                android:paddingLeft="10dp"
+                android:paddingStart="10dp"
+                android:singleLine="true"
+                android:textColor="#000000"
+                android:textColorHint="@color/text_hint"
+                android:textSize="16.0sp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"/>
+
+    </RelativeLayout>
 
     <TextView
             android:layout_width="81dp"
