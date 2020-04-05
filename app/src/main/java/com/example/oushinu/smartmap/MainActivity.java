@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -61,7 +62,8 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
     private RouteSearch mRouteSearch;
     private DriveRouteResult mDriveRouteResult;
     //起点待修改为当前定位点，终点待修改为搜索指定点
-    //第一个参数为经度，第二个参数为纬度
+    //第一个参数为纬度，第二个参数为经度
+    //设为null  app会闪退
     private LatLonPoint mStartPoint = new LatLonPoint(39.942295, 116.335891);
     private LatLonPoint mEndPoint = new LatLonPoint(39.995576, 116.481288);
     private final int ROUTE_TYPE_DRIVE = 2;//出行为驾车出行，标识为2
@@ -88,9 +90,16 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
 
         init();//调用init()方法
 
+        setupLocationStyle();
+
         mKeyWords = "";
 
         setfromandtoMarker();//调用setfromandtoMarker()方法
+
+    }
+
+    //实现定位蓝点，自定义定位蓝点
+    public void setupLocationStyle(){
 
         //借助地图SDK实现定位，两秒钟定位一次，定位蓝点不自动移动到视图中间，且定位图标可随手机朝向旋转
         myLocationStyle = new MyLocationStyle();
@@ -102,16 +111,6 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
         aMap.getUiSettings().setMyLocationButtonEnabled(true);//设置默认定位按钮是否显示，非必需设置。
         aMap.setMyLocationEnabled(true);// 设置为true表示启动显w示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false
         aMap.getUiSettings().setZoomControlsEnabled(false);//隐藏缩放按钮
-    }
-
-    //设置起点终点位置和图标
-    private void setfromandtoMarker() {
-        aMap.addMarker(new MarkerOptions()
-                .position(AMapUtil.convertToLatLng(mStartPoint))
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.start)));
-        aMap.addMarker(new MarkerOptions()
-                .position(AMapUtil.convertToLatLng(mEndPoint))
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.end)));
     }
 
     /**
@@ -136,8 +135,9 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
     }
 
     //获取经纬度信息
-    public void onMyLocationChange(android.location.Location location){
+    public void onMyLocationChange(Location location){
     //从location对象中获取经纬度信息，地址描述信息，建议拿到位置之后调用逆地理编码接口获取（获取地址描述数据章节有介绍）
+
     }
 
 
@@ -170,71 +170,17 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
         poiSearch.searchPOIAsyn();
     }
 
-    public void onDriveClick(View view) {
-        searchRouteResult(ROUTE_TYPE_DRIVE, RouteSearch.DRIVING_SINGLE_DEFAULT);//调用searchRouteResult(int routeType, int mode)方法
-        mapView.setVisibility(View.VISIBLE);//使view可见
-    }
-
-    /**
-     * 开始搜索路径规划方案
-     */
-    public void searchRouteResult(int routeType, int mode) {
-        if (mStartPoint == null) {
-            ToastUtil.show(mContext, "起点未设置");
-            return;
-        }
-        if (mEndPoint == null) {
-            ToastUtil.show(mContext, "终点未设置");
-        }
-        showProgressDialog();
-        final RouteSearch.FromAndTo fromAndTo = new RouteSearch.FromAndTo(
-                mStartPoint, mEndPoint);
-        if (routeType == ROUTE_TYPE_DRIVE) {// 驾车路径规划
-            RouteSearch.DriveRouteQuery query = new RouteSearch.DriveRouteQuery(fromAndTo, mode, null,
-                    null, "");// 第一个参数表示路径规划的起点和终点，第二个参数表示驾车模式，第三个参数表示途经点，第四个参数表示避让区域，第五个参数表示避让道路
-            mRouteSearch.calculateDriveRouteAsyn(query);// 异步路径规划驾车模式查询
-        }
-    }
-
-    @Override
-    public void onMapClick(LatLng latLng) {
-
-    }
-
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        marker.showInfoWindow();
-        return false;
-    }
-
-    @Override
-    public View getInfoContents(Marker marker) {
-        return null;
-    }
-
-    @Override
-    public View getInfoWindow(final Marker marker) {
-        View view = getLayoutInflater().inflate(R.layout.poikeywordsearch_uri,
-                null);
-        TextView title = (TextView) view.findViewById(R.id.title);
-        title.setText(marker.getTitle());
-
-        TextView snippet = (TextView) view.findViewById(R.id.snippet);
-        snippet.setText(marker.getSnippet());
-        return view;
-    }
-
     /**
      * poi没有搜索到数据，返回一些推荐城市的信息
      */
     private void showSuggestCity(List<SuggestionCity> cities) {
-        String infomation = "推荐城市\n";
+        String information = "推荐城市\n";
         for (int i = 0; i < cities.size(); i++) {
-            infomation += "城市名称:" + cities.get(i).getCityName() + "城市区号:"
+            information += "城市名称:" + cities.get(i).getCityName() + "城市区号:"
                     + cities.get(i).getCityCode() + "城市编码:"
                     + cities.get(i).getAdCode() + "\n";
         }
-        ToastUtil.show(MainActivity.this, infomation);
+        ToastUtil.show(MainActivity.this, information);
 
     }
 
@@ -280,62 +226,6 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
     @Override
     public void onPoiItemSearched(PoiItem item, int rCode) {
         // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onBusRouteSearched(BusRouteResult busRouteResult, int i) {
-
-    }
-
-    @Override
-    public void onDriveRouteSearched(DriveRouteResult driveRouteResult, int errorCode) {
-        dissmissProgressDialog();
-        aMap.clear();// 清理地图上的所有覆盖物
-        if (errorCode == 1000) {
-            if (driveRouteResult != null && driveRouteResult.getPaths() != null) {
-                if (driveRouteResult.getPaths().size() > 0) {
-                    mDriveRouteResult = driveRouteResult;
-                    final DrivePath drivePath = mDriveRouteResult.getPaths()
-                            .get(0);
-                    DrivingRouteOverlay drivingRouteOverlay = new DrivingRouteOverlay(
-                            mContext, aMap, drivePath,
-                            mDriveRouteResult.getStartPos(),
-                            mDriveRouteResult.getTargetPos(), null);
-                    drivingRouteOverlay.setNodeIconVisibility(false);//设置节点marker是否显示
-                    drivingRouteOverlay.setIsColorfulline(true);//是否用颜色展示交通拥堵情况，默认true
-                    drivingRouteOverlay.removeFromMap();
-                    drivingRouteOverlay.addToMap();
-                    drivingRouteOverlay.zoomToSpan();
-                    mBottomLayout.setVisibility(View.VISIBLE);
-                    int dis = (int) drivePath.getDistance();
-                    int dur = (int) drivePath.getDuration();
-                    String des = AMapUtil.getFriendlyTime(dur)+"("+AMapUtil.getFriendlyLength(dis)+")";
-                    mRouteTimeDes.setText(des);
-                    mRouteDetailDes.setVisibility(View.VISIBLE);
-                    int taxiCost = (int) mDriveRouteResult.getTaxiCost();
-                    mRouteDetailDes.setText("打车约"+taxiCost+"元");
-                    mBottomLayout.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(mContext,
-                                    DriveRouteDetailActivity.class);
-                            intent.putExtra("drive_path", drivePath);
-                            intent.putExtra("drive_result",
-                                    mDriveRouteResult);
-                            startActivity(intent);
-                        }
-                    });
-                } else if (driveRouteResult != null && driveRouteResult.getPaths() == null) {
-                    ToastUtil.show(mContext, R.string.no_result);
-                }
-
-            } else {
-                ToastUtil.show(mContext, R.string.no_result);
-            }
-        } else {
-            ToastUtil.showerror(this.getApplicationContext(), errorCode);
-        }
 
     }
 
@@ -414,6 +304,127 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMyLocation
                 break;
         }
     }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        marker.showInfoWindow();
+        return false;
+    }
+
+    @Override
+    public View getInfoContents(Marker marker) {
+        return null;
+    }
+
+    @Override
+    public View getInfoWindow(final Marker marker) {
+        View view = getLayoutInflater().inflate(R.layout.poikeywordsearch_uri,
+                null);
+        TextView title = (TextView) view.findViewById(R.id.title);
+        title.setText(marker.getTitle());
+
+        TextView snippet = (TextView) view.findViewById(R.id.snippet);
+        snippet.setText(marker.getSnippet());
+        return view;
+    }
+
+    //设置起点终点位置和图标
+    private void setfromandtoMarker() {
+        aMap.addMarker(new MarkerOptions()
+                .position(AMapUtil.convertToLatLng(mStartPoint))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.start)));
+        aMap.addMarker(new MarkerOptions()
+                .position(AMapUtil.convertToLatLng(mEndPoint))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.end)));
+    }
+
+    /**
+     * 开始搜索路径规划方案
+     */
+    public void searchRouteResult(int routeType, int mode) {
+        if (mStartPoint == null) {
+            ToastUtil.show(mContext, "起点未设置");
+            return;
+        }
+        if (mEndPoint == null) {
+            ToastUtil.show(mContext, "终点未设置");
+        }
+        showProgressDialog();
+        final RouteSearch.FromAndTo fromAndTo = new RouteSearch.FromAndTo(
+                mStartPoint, mEndPoint);
+        if (routeType == ROUTE_TYPE_DRIVE) {// 驾车路径规划
+            RouteSearch.DriveRouteQuery query = new RouteSearch.DriveRouteQuery(fromAndTo, mode, null,
+                    null, "");// 第一个参数表示路径规划的起点和终点，第二个参数表示驾车模式，第三个参数表示途经点，第四个参数表示避让区域，第五个参数表示避让道路
+            mRouteSearch.calculateDriveRouteAsyn(query);// 异步路径规划驾车模式查询
+        }
+    }
+
+    public void onDriveClick(View view) {
+        searchRouteResult(ROUTE_TYPE_DRIVE, RouteSearch.DRIVING_SINGLE_DEFAULT);//调用searchRouteResult(int routeType, int mode)方法
+        mapView.setVisibility(View.VISIBLE);//使view可见
+    }
+
+    @Override
+    public void onBusRouteSearched(BusRouteResult busRouteResult, int i) {
+
+    }
+
+    @Override
+    public void onDriveRouteSearched(DriveRouteResult driveRouteResult, int errorCode) {
+        dissmissProgressDialog();
+        aMap.clear();// 清理地图上的所有覆盖物
+        if (errorCode == 1000) {
+            if (driveRouteResult != null && driveRouteResult.getPaths() != null) {
+                if (driveRouteResult.getPaths().size() > 0) {
+                    mDriveRouteResult = driveRouteResult;
+                    final DrivePath drivePath = mDriveRouteResult.getPaths()
+                            .get(0);
+                    DrivingRouteOverlay drivingRouteOverlay = new DrivingRouteOverlay(
+                            mContext, aMap, drivePath,
+                            mDriveRouteResult.getStartPos(),
+                            mDriveRouteResult.getTargetPos(), null);
+                    drivingRouteOverlay.setNodeIconVisibility(false);//设置节点marker是否显示
+                    drivingRouteOverlay.setIsColorfulline(true);//是否用颜色展示交通拥堵情况，默认true
+                    drivingRouteOverlay.removeFromMap();
+                    drivingRouteOverlay.addToMap();
+                    drivingRouteOverlay.zoomToSpan();
+                    mBottomLayout.setVisibility(View.VISIBLE);
+                    int dis = (int) drivePath.getDistance();
+                    int dur = (int) drivePath.getDuration();
+                    String des = AMapUtil.getFriendlyTime(dur)+"("+AMapUtil.getFriendlyLength(dis)+")";
+                    mRouteTimeDes.setText(des);
+                    mRouteDetailDes.setVisibility(View.VISIBLE);
+                    int taxiCost = (int) mDriveRouteResult.getTaxiCost();
+                    mRouteDetailDes.setText("打车约"+taxiCost+"元");
+                    mBottomLayout.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(mContext,
+                                    DriveRouteDetailActivity.class);
+                            intent.putExtra("drive_path", drivePath);
+                            intent.putExtra("drive_result",
+                                    mDriveRouteResult);
+                            startActivity(intent);
+                        }
+                    });
+                } else if (driveRouteResult != null && driveRouteResult.getPaths() == null) {
+                    ToastUtil.show(mContext, R.string.no_result);
+                }
+
+            } else {
+                ToastUtil.show(mContext, R.string.no_result);
+            }
+        } else {
+            ToastUtil.showerror(this.getApplicationContext(), errorCode);
+        }
+
+    }
+
 
     @Override
     public void onWalkRouteSearched(WalkRouteResult walkRouteResult, int i) {

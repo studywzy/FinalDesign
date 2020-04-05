@@ -23,6 +23,8 @@ import java.util.List;
 /**
  * @author Wzy
  * @date 2020-03-28 - 20:58
+ *
+ * 输入提示功能实现
  */
 public class InputTipsActivity extends Activity implements SearchView.OnQueryTextListener, Inputtips.InputtipsListener, OnItemClickListener, View.OnClickListener {
     private SearchView mSearchView;// 输入搜索关键字

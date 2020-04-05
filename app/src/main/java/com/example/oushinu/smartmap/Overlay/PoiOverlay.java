@@ -33,7 +33,7 @@ public class PoiOverlay {
     public void addToMap() {
         try{
             for (int i = 0; i < mPois.size(); i++) {
-                Marker marker = mAMap.addMarker(getMarkerOptions(i));
+                Marker marker = mAMap.addMarker(getMarkerOptions(i));//调用getMarkerOptions方法
                 marker.setObject(i);
                 mPoiMarks.add(marker);
             }
@@ -61,7 +61,7 @@ public class PoiOverlay {
                     mAMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mPois.get(0).getLatLonPoint().getLatitude(),
                             mPois.get(0).getLatLonPoint().getLongitude()), 18f));
                 }else{
-                    LatLngBounds bounds = getLatLngBounds();
+                    LatLngBounds bounds = getLatLngBounds();//调用getLatLngBounds方法
                     mAMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30));
                 }
             }

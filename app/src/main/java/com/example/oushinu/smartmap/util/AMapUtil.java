@@ -24,6 +24,7 @@ public class AMapUtil {
 	/**
 	 * 判断edittext是否null
 	 */
+
 	public static String checkEditText(EditText editText) {
 		if (editText != null && editText.getText() != null
 				&& !(editText.getText().toString().trim().equals(""))) {

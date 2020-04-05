@@ -17,7 +17,7 @@ import com.example.oushinu.smartmap.util.AMapUtil;
 import java.util.List;
 
 /**
- * 驾车具体路径activity
+ * 驾驶路线详情
  */
 
 
@@ -32,8 +32,7 @@ public class DriveRouteDetailActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_route_detail);//唤醒驾车具体路径布局文件
-
-		getIntentData();
+		getIntentData();//调用getIntentData()方法
 		init();
 	}
 
@@ -66,16 +65,16 @@ public class DriveRouteDetailActivity extends Activity {
 		}
 		mDrivePath = intent.getParcelableExtra("drive_path");
 		mDriveRouteResult = intent.getParcelableExtra("drive_result");
-//		for (int i = 0; i < mDrivePath.getSteps().size(); i++) {
-//			DriveStep step = mDrivePath.getSteps().get(i);
-//			List<TMC> tmclist = step.getTMCs();
-//			for (int j = 0; j < tmclist.size(); j++) {
-//				String s = ""+tmclist.get(j).getPolyline().size();
-//				Log.i("MY", s+tmclist.get(j).getStatus()
-//						+tmclist.get(j).getDistance()
-//						+tmclist.get(j).getPolyline().toString());
-//			}
-//		}
+		for (int i = 0; i < mDrivePath.getSteps().size(); i++) {
+			DriveStep step = mDrivePath.getSteps().get(i);
+			List<TMC> tmclist = step.getTMCs();
+			for (int j = 0; j < tmclist.size(); j++) {
+				String s = ""+tmclist.get(j).getPolyline().size();
+				Log.i("MY", s+tmclist.get(j).getStatus()
+						+tmclist.get(j).getDistance()
+						+tmclist.get(j).getPolyline().toString());
+			}
+		}
 	}
 
 	public void onBackClick(View view) {
