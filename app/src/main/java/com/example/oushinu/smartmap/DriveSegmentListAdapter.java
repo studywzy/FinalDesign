@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 驾车路段adapter
+ * 驾车路段listview adapter
  *
  * 
  */

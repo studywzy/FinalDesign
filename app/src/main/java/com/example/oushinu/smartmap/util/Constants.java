@@ -5,6 +5,8 @@ import com.amap.api.maps.model.LatLng;
 /**
  * @author Wzy
  * @date 2020-03-22 - 15:33
+ *
+ * 常量
  */
 public class Constants {
 

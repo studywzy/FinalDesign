@@ -9,7 +9,7 @@ import android.widget.Toast;
 import com.amap.api.services.core.AMapException;
 
 /**
- * 打印异常类
+ * 打印类
  */
 
 public class ToastUtil {

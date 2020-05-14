@@ -345,7 +345,7 @@ public class DrivingRouteOverlay extends RouteOverlay {
         double y1 = start.latitude;
         double x2 = end.longitude;
         double y2 = end.latitude;
-        return calculateDistance(x1, y1, x2, y2);
+        return calculateDistance(x1, y1, x2, y2);//调用calculateDistance方法
     }
 
     //方法重载，数学实现

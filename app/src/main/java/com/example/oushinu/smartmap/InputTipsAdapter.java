@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * @author Wzy
  * @date 2020-03-22 - 15:27
- * 输入提示adapter，展示item名称和地址
+ * 输入提示listview adapter，展示item名称和地址
  */
 public class InputTipsAdapter extends BaseAdapter {
     private Context mContext;

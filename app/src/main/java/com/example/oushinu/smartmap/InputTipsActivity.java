@@ -26,7 +26,8 @@ import java.util.List;
  *
  * 输入提示功能实现
  */
-public class InputTipsActivity extends Activity implements SearchView.OnQueryTextListener, Inputtips.InputtipsListener, OnItemClickListener, View.OnClickListener {
+public class InputTipsActivity extends Activity implements SearchView.OnQueryTextListener,
+        Inputtips.InputtipsListener, OnItemClickListener, View.OnClickListener {
     private SearchView mSearchView;// 输入搜索关键字
     private ImageView mBack;
     private ListView mInputListView;
@@ -39,7 +40,7 @@ public class InputTipsActivity extends Activity implements SearchView.OnQueryTex
         setContentView(R.layout.activity_input_tips);
         initSearchView();
         mInputListView = (ListView) findViewById(R.id.inputtip_list);
-        mInputListView.setOnItemClickListener(this);
+        mInputListView.setOnItemClickListener(this);//点击事件
         mBack = (ImageView) findViewById(R.id.back);
         mBack.setOnClickListener(this);
     }
@@ -85,7 +86,7 @@ public class InputTipsActivity extends Activity implements SearchView.OnQueryTex
             Tip tip = (Tip) adapterView.getItemAtPosition(i);
             Intent intent = new Intent();
             intent.putExtra(Constants.EXTRA_TIP, tip);
-            setResult(MainActivity.RESULT_CODE_INPUTTIPS, intent);
+            setResult(MainActivity.RESULT_CODE_INPUTTIPS, intent);//向MainActivity返回RESULT_CODE_INPUTTIPS
             this.finish();
         }
     }
@@ -100,7 +101,7 @@ public class InputTipsActivity extends Activity implements SearchView.OnQueryTex
     public boolean onQueryTextSubmit(String query) {
         Intent intent = new Intent();
         intent.putExtra(Constants.KEY_WORDS_NAME, query);
-        setResult(MainActivity.RESULT_CODE_KEYWORDS, intent);
+        setResult(MainActivity.RESULT_CODE_KEYWORDS, intent);//向MainActivity返回RESULT_CODE_KEYWORDS
         this.finish();
         return false;
     }

@@ -5,6 +5,12 @@
 
     <string name="no_result">对不起，没有搜索到相关数据！</string>
 
+    <string name="getroute">避拥堵</string>
+    <string name="getroute2">最短距</string>
+    <string name="getroute3">最短时</string>
+
+    <string name="keyword_search">关键字搜索</string>
+
     <string name="gpsfollow">追随</string>
     <string name="gpslocate">定位</string>
     <string name="gpsrotate">旋转</string>
